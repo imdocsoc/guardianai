@@ -1,0 +1,19 @@
+# Node
+node_modules
+package-lock.json
+
+# Next.js
+.next
+out
+
+# Builds
+dist
+build
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
