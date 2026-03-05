@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: guardianai_db
+    environment:
+      POSTGRES_USER: guardianai
+      POSTGRES_PASSWORD: guardianai_dev_pw
+      POSTGRES_DB: guardianai
+    ports:
+      - "5432:5432"
+    volumes:
+      - guardianai_db_data:/var/lib/postgresql/data
+
+volumes:
+  guardianai_db_data:
