@@ -2,21 +2,81 @@
 
 
 
-GuardianAI is a security-first case management backend designed to demonstrate modern full-stack architecture using Fastify, Prisma, and PostgreSQL.
+GuardianAI is a security-first case management system built to demonstrate modern full-stack engineering practices.
 
 
 
-\## Architecture
+\## Current Stack
 
 
 
-\- Fastify (Node.js API)
+\- \*\*Frontend:\*\* Next.js
 
-\- Prisma ORM
+\- \*\*Backend API:\*\* Fastify
 
-\- PostgreSQL (Docker)
+\- \*\*ORM:\*\* Prisma
 
-\- TypeScript
+\- \*\*Database:\*\* PostgreSQL
+
+\- \*\*Infrastructure:\*\* Docker
+
+\- \*\*Language:\*\* TypeScript
+
+\- \*\*Frontend Hosting:\*\* Vercel
+
+
+
+\## Current Features
+
+
+
+\### Health \& Diagnostics
+
+\- `GET /health`
+
+\- `GET /db-check`
+
+
+
+\### Cases API
+
+\- `GET /cases`
+
+\- `GET /cases/:id`
+
+\- `POST /cases`
+
+\- `PATCH /cases/:id`
+
+\- `DELETE /cases/:id`
+
+
+
+\## Architecture Overview
+
+
+
+GuardianAI is structured as a monorepo:
+
+
+
+```text
+
+guardianai/
+
+├─ apps/
+
+│  ├─ web/        # Next.js frontend
+
+│  └─ api/        # Fastify API
+
+├─ packages/      # shared code (planned)
+
+├─ docs/          # architecture and runbook
+
+├─ infra/         # infrastructure (planned)
+
+└─ docker-compose.yml
 
 
 
@@ -29,4 +89,7 @@ GuardianAI is a security-first case management backend designed to demonstrate m
 ```bash
 
 docker compose up -d
+
+
+
 

@@ -30,75 +30,75 @@ Security-first case management with AI-assisted document search.
 
 
 
-GuardianAI is a modular case management backend designed with a separation of concerns between routing, business logic, and data persistence.
+GuardianAI is a modular case management application designed around a clean separation 
+
+between presentation, API logic, data access, and infrastructure.
 
 
 
-\## Components
+The current implementation focuses on backend stability, persistence, and maintainable structure.
 
 
 
-\### API Layer
-
-\- Fastify
-
-\- Handles routing and request lifecycle
+\## System Components
 
 
 
-\### Service Layer
+\### Frontend
 
-\- Business logic (planned expansion)
+\- \*\*Framework:\*\* Next.js
 
+\- \*\*Purpose:\*\* user-facing application and portfolio-facing demo
 
-
-\### Data Layer
-
-\- Prisma ORM
-
-\- PostgreSQL database
+\- \*\*Hosting:\*\* Vercel
 
 
 
-\### Infrastructure
+\### Backend API
 
-\- Docker container for database
+\- \*\*Framework:\*\* Fastify
 
-\- Local development environment
+\- \*\*Purpose:\*\* expose REST endpoints for case management
 
-
-
-\## Data Flow
+\- \*\*Language:\*\* TypeScript
 
 
 
-Client → API → Prisma → PostgreSQL → Response
+\### ORM
+
+\- \*\*Tool:\*\* Prisma
+
+\- \*\*Purpose:\*\* model application data and manage database queries/migrations
 
 
 
-\## Design Principles
+\### Database
+
+\- \*\*Engine:\*\* PostgreSQL
+
+\- \*\*Runtime:\*\* Docker container
 
 
 
-\- Separation of concerns
-
-\- Type safety (TypeScript)
-
-\- Minimal surface area for security
-
-\- Extensible architecture for AI integration
+\## Monorepo Structure
 
 
 
-\## Future Enhancements
+```text
 
+guardianai/
 
+├─ apps/
 
-\- Authentication (JWT)
+│  ├─ web/
 
-\- Role-based access control
+│  └─ api/
 
-\- AI-assisted case search (RAG)
+├─ packages/
 
-\- Cloud deployment (AWS/GCP)
+├─ docs/
+
+├─ infra/
+
+└─ docker-compose.yml
 
