@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { PrismaClient } from "@prisma/client";
+import { createCaseSchema, updateCaseSchema } from "../schemas/case.ts";
 
 const prisma = new PrismaClient();
 
@@ -32,62 +33,54 @@ export async function caseRoutes(app: FastifyInstance) {
 
   // POST /cases
   app.post("/cases", async (request, reply) => {
-    const body = request.body as {
-      title?: string;
-      description?: string;
-      status?: string;
-    };
+  const parsed = createCaseSchema.safeParse(request.body);
 
-    if (!body?.title) {
-      return reply.status(400).send({
-        error: "title is required",
-      });
-    }
-
-    const newCase = await prisma.case.create({
-      data: {
-        title: body.title,
-        description: body.description ?? null,
-        status: body.status ?? "open",
-      },
+  if (!parsed.success) {
+    return reply.status(400).send({
+      error: parsed.error.flatten(),
     });
+  }
 
-    return reply.status(201).send({ case: newCase });
+  const newCase = await prisma.case.create({
+    data: {
+      title: parsed.data.title,
+      description: parsed.data.description ?? null,
+      status: parsed.data.status ?? "open",
+    },
   });
+
+  return reply.status(201).send({ case: newCase });
+});
 
   // PATCH /cases/:id
   app.patch("/cases/:id", async (request, reply) => {
-    const params = request.params as { id: string };
-    const body = request.body as {
-      title?: string;
-      description?: string | null;
-      status?: string;
-    };
+  const params = request.params as { id: string };
 
-    const existingCase = await prisma.case.findUnique({
-      where: { id: params.id },
+  const parsed = updateCaseSchema.safeParse(request.body);
+
+  if (!parsed.success) {
+    return reply.status(400).send({
+      error: parsed.error.flatten(),
     });
+  }
 
-    if (!existingCase) {
-      return reply.status(404).send({
-        error: "case not found",
-      });
-    }
-
-    const updatedCase = await prisma.case.update({
-      where: { id: params.id },
-      data: {
-        title: body.title ?? existingCase.title,
-        description:
-          body.description !== undefined
-            ? body.description
-            : existingCase.description,
-        status: body.status ?? existingCase.status,
-      },
-    });
-
-    return { case: updatedCase };
+  const existingCase = await prisma.case.findUnique({
+    where: { id: params.id },
   });
+
+  if (!existingCase) {
+    return reply.status(404).send({
+      error: "case not found",
+    });
+  }
+
+  const updatedCase = await prisma.case.update({
+    where: { id: params.id },
+    data: parsed.data,
+  });
+
+  return { case: updatedCase };
+});
 
   // DELETE /cases/:id
   app.delete("/cases/:id", async (request, reply) => {

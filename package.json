@@ -5,11 +5,10 @@
     "apps/*",
     "packages/*"
   ],
-  "scripts": {
-    "dev": "npm run dev -w @guardianai/web",
-    "dev:web": "npm run dev -w @guardianai/web",
-    "dev:api": "npm run dev -w @guardianai/api",
-    "lint": "npm run lint -ws",
-    "build": "npm run build -ws"
-  }
+ "scripts": {
+  "dev:web": "npm run dev -w @guardianai/web",
+  "dev:api": "npm run dev -w @guardianai/api",
+  "lint": "npm run lint -ws",
+  "build": "npm run build -ws"
 }
+  }
