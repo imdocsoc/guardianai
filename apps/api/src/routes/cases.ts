@@ -1,26 +1,23 @@
 import { FastifyInstance } from "fastify";
-import { PrismaClient } from "@prisma/client";
 import { createCaseSchema, updateCaseSchema } from "../schemas/case.ts";
-
-const prisma = new PrismaClient();
+import {
+  getAllCases,
+  getCaseById,
+  createCase,
+  updateCase,
+  deleteCase,
+} from "../services/caseService.ts";
 
 export async function caseRoutes(app: FastifyInstance) {
-  // GET /cases
   app.get("/cases", async () => {
-    const cases = await prisma.case.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-
+    const cases = await getAllCases();
     return { cases };
   });
 
-  // GET /cases/:id
   app.get("/cases/:id", async (request, reply) => {
     const params = request.params as { id: string };
 
-    const foundCase = await prisma.case.findUnique({
-      where: { id: params.id },
-    });
+    const foundCase = await getCaseById(params.id);
 
     if (!foundCase) {
       return reply.status(404).send({
@@ -31,64 +28,31 @@ export async function caseRoutes(app: FastifyInstance) {
     return { case: foundCase };
   });
 
-  // POST /cases
   app.post("/cases", async (request, reply) => {
-  const parsed = createCaseSchema.safeParse(request.body);
+    const parsed = createCaseSchema.safeParse(request.body);
 
-  if (!parsed.success) {
-    return reply.status(400).send({
-      error: parsed.error.flatten(),
-    });
-  }
+    if (!parsed.success) {
+      return reply.status(400).send({
+        error: parsed.error.flatten(),
+      });
+    }
 
-  const newCase = await prisma.case.create({
-    data: {
-      title: parsed.data.title,
-      description: parsed.data.description ?? null,
-      status: parsed.data.status ?? "open",
-    },
+    const newCase = await createCase(parsed.data);
+
+    return reply.status(201).send({ case: newCase });
   });
 
-  return reply.status(201).send({ case: newCase });
-});
-
-  // PATCH /cases/:id
   app.patch("/cases/:id", async (request, reply) => {
-  const params = request.params as { id: string };
-
-  const parsed = updateCaseSchema.safeParse(request.body);
-
-  if (!parsed.success) {
-    return reply.status(400).send({
-      error: parsed.error.flatten(),
-    });
-  }
-
-  const existingCase = await prisma.case.findUnique({
-    where: { id: params.id },
-  });
-
-  if (!existingCase) {
-    return reply.status(404).send({
-      error: "case not found",
-    });
-  }
-
-  const updatedCase = await prisma.case.update({
-    where: { id: params.id },
-    data: parsed.data,
-  });
-
-  return { case: updatedCase };
-});
-
-  // DELETE /cases/:id
-  app.delete("/cases/:id", async (request, reply) => {
     const params = request.params as { id: string };
+    const parsed = updateCaseSchema.safeParse(request.body);
 
-    const existingCase = await prisma.case.findUnique({
-      where: { id: params.id },
-    });
+    if (!parsed.success) {
+      return reply.status(400).send({
+        error: parsed.error.flatten(),
+      });
+    }
+
+    const existingCase = await getCaseById(params.id);
 
     if (!existingCase) {
       return reply.status(404).send({
@@ -96,9 +60,23 @@ export async function caseRoutes(app: FastifyInstance) {
       });
     }
 
-    await prisma.case.delete({
-      where: { id: params.id },
-    });
+    const updated = await updateCase(params.id, parsed.data);
+
+    return { case: updated };
+  });
+
+  app.delete("/cases/:id", async (request, reply) => {
+    const params = request.params as { id: string };
+
+    const existingCase = await getCaseById(params.id);
+
+    if (!existingCase) {
+      return reply.status(404).send({
+        error: "case not found",
+      });
+    }
+
+    await deleteCase(params.id);
 
     return reply.status(204).send();
   });
