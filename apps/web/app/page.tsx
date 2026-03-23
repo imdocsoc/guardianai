@@ -23,6 +23,9 @@ export default function Home() {
           <a className="rounded-lg border px-5 py-2" href="/status">
             System Status
           </a>
+		  <a className="rounded-lg border px-5 py-2" href="/cases">
+            View Cases
+          </a>
         </div>
 
         <div className="mt-14 grid gap-6 md:grid-cols-3">
