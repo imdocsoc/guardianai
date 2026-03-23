@@ -1,3 +1,5 @@
+import CasesClient from "./CasesClient";
+
 type CaseItem = {
   id: string;
   title: string;
@@ -37,33 +39,7 @@ export default async function CasesPage() {
         Live cases pulled from the GuardianAI API.
       </p>
 
-      <div className="mt-8 grid gap-4">
-        {cases.length === 0 ? (
-          <div className="rounded-2xl border p-6">
-            <p className="text-gray-600">No cases found.</p>
-          </div>
-        ) : (
-          cases.map((item) => (
-            <div key={item.id} className="rounded-2xl border p-6">
-              <div className="flex items-center justify-between gap-4">
-                <h2 className="text-xl font-semibold">{item.title}</h2>
-                <span className="text-sm rounded-full border px-3 py-1">
-                  {item.status}
-                </span>
-              </div>
-
-              <p className="mt-3 text-gray-700">
-                {item.description ?? "No description provided."}
-              </p>
-
-              <div className="mt-4 text-sm text-gray-500">
-                <p>ID: {item.id}</p>
-                <p>Created: {new Date(item.createdAt).toLocaleString()}</p>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+      <CasesClient cases={cases} />
     </main>
   );
 }
