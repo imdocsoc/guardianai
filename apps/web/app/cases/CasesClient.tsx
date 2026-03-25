@@ -23,44 +23,48 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    setError("");
+  e.preventDefault();
+  setSubmitting(true);
+  setError("");
 
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-      if (!baseUrl) {
-        throw new Error("NEXT_PUBLIC_API_BASE_URL is not set");
-      }
-
-      const res = await fetch(new URL("/cases", baseUrl).toString(), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          status,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data?.error?.fieldErrors?.title?.[0] || "Failed to create case");
-      }
-
-      setTitle("");
-      setDescription("");
-      setStatus("open");
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unexpected error");
-    } finally {
-      setSubmitting(false);
+    if (!baseUrl) {
+      throw new Error("API base URL is not configured for this environment.");
     }
+
+    const res = await fetch(new URL("/cases", baseUrl).toString(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title,
+        description,
+        status,
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(
+        data?.error?.fieldErrors?.title?.[0] ||
+          data?.message ||
+          "Failed to create case"
+      );
+    }
+
+    setTitle("");
+    setDescription("");
+    setStatus("open");
+    router.refresh();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Unexpected error");
+  } finally {
+    setSubmitting(false);
   }
+}
 
   return (
     <div className="mt-8 space-y-8">
