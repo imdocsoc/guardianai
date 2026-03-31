@@ -26,9 +26,30 @@ app.get("/db-check", async () => {
 const start = async () => {
   try {
     await app.register(cors, {
-      origin: "http://localhost:3000",
-      methods: ["GET", "POST", "PATCH", "DELETE"],
-    });
+  origin: (origin, callback) => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "https://guardianai-web.vercel.app",
+    ];
+
+    const isVercelPreview =
+      origin.startsWith("https://guardianai-") &&
+      origin.endsWith(".vercel.app");
+
+    if (allowedOrigins.includes(origin) || isVercelPreview) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Not allowed by CORS"), false);
+  },
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+});
 
     await app.register(caseRoutes);
 
