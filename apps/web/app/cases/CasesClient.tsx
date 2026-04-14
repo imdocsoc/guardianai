@@ -22,6 +22,7 @@ type EditState = {
 export default function CasesClient({ cases }: { cases: CaseItem[] }) {
   const router = useRouter();
 
+  const [adminKey, setAdminKey] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("open");
@@ -46,6 +47,13 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
     return baseUrl;
   }
 
+  function getAuthHeaders() {
+    return {
+      "Content-Type": "application/json",
+      "x-admin-key": adminKey,
+    };
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
@@ -54,9 +62,7 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
     try {
       const res = await fetch(new URL("/cases", getBaseUrl()).toString(), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           title,
           description,
@@ -69,6 +75,7 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
         throw new Error(
           data?.error?.fieldErrors?.title?.[0] ||
             data?.message ||
+            data?.error ||
             "Failed to create case"
         );
       }
@@ -111,9 +118,7 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
     try {
       const res = await fetch(new URL(`/cases/${id}`, getBaseUrl()).toString(), {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           title: editValues.title,
           description: editValues.description,
@@ -123,7 +128,7 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.message || "Failed to update case");
+        throw new Error(data?.message || data?.error || "Failed to update case");
       }
 
       setEditingId(null);
@@ -145,11 +150,14 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
     try {
       const res = await fetch(new URL(`/cases/${id}`, getBaseUrl()).toString(), {
         method: "DELETE",
+        headers: {
+          "x-admin-key": adminKey,
+        },
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.message || "Failed to delete case");
+        throw new Error(data?.message || data?.error || "Failed to delete case");
       }
 
       if (editingId === id) {
@@ -166,6 +174,20 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
 
   return (
     <div className="mt-8 space-y-8">
+      <section className="rounded-2xl border p-6">
+        <h2 className="text-2xl font-semibold">Admin Access</h2>
+        <div className="mt-4">
+          <label className="mb-2 block text-sm">Admin Key</label>
+          <input
+            type="password"
+            className="w-full rounded-lg border bg-transparent px-3 py-2"
+            value={adminKey}
+            onChange={(e) => setAdminKey(e.target.value)}
+            placeholder="Enter admin key"
+          />
+        </div>
+      </section>
+
       <section className="rounded-2xl border p-6">
         <h2 className="text-2xl font-semibold">Create Case</h2>
 
@@ -215,9 +237,7 @@ export default function CasesClient({ cases }: { cases: CaseItem[] }) {
         </form>
       </section>
 
-      {actionError ? (
-        <p className="text-sm text-red-400">{actionError}</p>
-      ) : null}
+      {actionError ? <p className="text-sm text-red-400">{actionError}</p> : null}
 
       <section className="grid gap-4">
         {cases.length === 0 ? (

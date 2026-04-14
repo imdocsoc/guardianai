@@ -1,4 +1,4 @@
-import { FastifyInstance } from "fastify";
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { createCaseSchema, updateCaseSchema } from "../schemas/case.ts";
 import {
   getAllCases,
@@ -7,6 +7,31 @@ import {
   updateCase,
   deleteCase,
 } from "../services/caseService.ts";
+
+function requireAdminKey(request: FastifyRequest, reply: FastifyReply) {
+  const configuredAdminKey = process.env.ADMIN_KEY;
+
+  if (!configuredAdminKey) {
+    reply.status(500).send({
+      error: "admin protection is not configured",
+    });
+    return false;
+  }
+
+  const providedAdminKey = request.headers["x-admin-key"];
+
+  if (
+    typeof providedAdminKey !== "string" ||
+    providedAdminKey !== configuredAdminKey
+  ) {
+    reply.status(401).send({
+      error: "unauthorized",
+    });
+    return false;
+  }
+
+  return true;
+}
 
 export async function caseRoutes(app: FastifyInstance) {
   app.get("/cases", async () => {
@@ -29,6 +54,8 @@ export async function caseRoutes(app: FastifyInstance) {
   });
 
   app.post("/cases", async (request, reply) => {
+    if (!requireAdminKey(request, reply)) return;
+
     const parsed = createCaseSchema.safeParse(request.body);
 
     if (!parsed.success) {
@@ -43,6 +70,8 @@ export async function caseRoutes(app: FastifyInstance) {
   });
 
   app.patch("/cases/:id", async (request, reply) => {
+    if (!requireAdminKey(request, reply)) return;
+
     const params = request.params as { id: string };
     const parsed = updateCaseSchema.safeParse(request.body);
 
@@ -66,6 +95,8 @@ export async function caseRoutes(app: FastifyInstance) {
   });
 
   app.delete("/cases/:id", async (request, reply) => {
+    if (!requireAdminKey(request, reply)) return;
+
     const params = request.params as { id: string };
 
     const existingCase = await getCaseById(params.id);
